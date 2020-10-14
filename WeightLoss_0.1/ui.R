@@ -25,14 +25,15 @@ shinyUI(navbarPage("Test ODE output and plotting using Lorenz",
          sidebarPanel(
              numericInput("week", "Week: ", 0),
              numericInput("actual", "Actual Weight: ", 200),
-             fileInput("load", "Load csv", accept = ".csv"),
-             actionButton("userfile", "Use File"),
              actionButton("addrow", "Add Entry"),
              actionButton("merge", "Add to Plot"),
-             downloadButton("download", lable = "Export Table")
+             downloadButton("download", lable = "Export Table"),
+             fileInput("load", "Load csv", accept = ".csv"),
+             actionButton("userfile", "Use File")
          ),
          mainPanel(tableOutput("guessTable"))
         )
     )
 )
+
 
