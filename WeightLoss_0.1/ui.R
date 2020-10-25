@@ -1,7 +1,8 @@
 library(shiny)
+library(shinycssloaders)
 
 # Define UI
-shinyUI(navbarPage("Test ODE output and plotting using Lorenz",
+shinyUI(navbarPage("Weight Loss DE Plotter",
     
     # Application title
   
@@ -10,16 +11,35 @@ shinyUI(navbarPage("Test ODE output and plotting using Lorenz",
     
     tabPanel("Plot", fluid = TRUE,
         sidebarPanel(    
-            numericInput("tmax", "T:", 100),
-            numericInput("alpha", "alpha:", 0.3),
-            numericInput("A", "A:", -8/3),
-            numericInput("B", "B:", -10),
-            numericInput("C", "C:", 28),
-            numericInput("weight", "Starting Weight:", 200),
+            radioButtons("sex", 
+                               label = "Sex: ",
+                               inline = TRUE,
+                               choiceNames = c("Male", "Female"),
+                               choiceValues = c("M", "F"),
+                               selected = "F"),
+            numericInput("weight", 
+                         label = "Starting Weight (Kg): ", 
+                         value = 80),
+            numericInput("age", 
+                         label = "Age:",
+                         value = 44),
+            numericInput("height",
+                         label = "Height (cm): ",
+                         value = 150.2),
+            numericInput("Tf", 
+                         label = "Number of days to diet: ",
+                         value = 336),
+            sliderInput("CalRed",
+                         label = "Percent Calories to reduce from Total Energy Expenditure: ",
+                         value = .25,
+                         min = 0,
+                         max = 1
+                         ),
             actionButton("execute", "Calculate")
         ),
-        mainPanel(plotOutput("guessPlot"),
-                  tableOutput("fullTable"))
+        mainPanel(plotOutput("guessPlot")%>% withSpinner(color="#0dc5c1"),
+                  tableOutput("fullTable") 
+                  )
     ),
     tabPanel("Table", fluid = TRUE,
          sidebarPanel(
@@ -32,7 +52,9 @@ shinyUI(navbarPage("Test ODE output and plotting using Lorenz",
              actionButton("userfile", "Use File")
          ),
          mainPanel(tableOutput("guessTable"))
-        )
+        ),
+    tabPanel("TestValues", fluid = TRUE,
+             mainPanel(textOutput("test")))
     )
 )
 
