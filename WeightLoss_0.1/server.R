@@ -1,6 +1,8 @@
 library(shiny)
 library(deSolve) 
-library(ggplot2)
+library(tidyverse)
+library(plotly)
+#library(shinycssloaders)
 
 
 # Define server logic required to plot various variables
@@ -63,7 +65,7 @@ shinyServer(function(input, output) {
             mff <- 10.4 * log(f / C)
             RMR <- a1 * (mff + f)^p - y1*(A + t/365)
             PA <- PA0 / W0 * (mff + f)
-            G1 <- 2*((1-a)*RMR + DIT1 + PA) + CC
+            G1 <- 2*((1-a)*RMR + DIT1 + PA) + CC #Changed the model to match Java code DIT1 is currently set to DIT0
             
             # rate of change
             df <- if_else(G1 <= 0,
@@ -79,7 +81,8 @@ shinyServer(function(input, output) {
  return(ode(y = state,
             times = times,
             func = derivs,
-            parms = pars))
+            parms = pars,
+            method = rk4))
  }
     
     
@@ -97,21 +100,22 @@ shinyServer(function(input, output) {
                       NI1 = isolate(NI1()),
                       A = isolate(input$age),
                       a1 = isolate(a1()),
-                      y1 = isolate(y1())
+                      y1 = isolate(y1()),
+                      DIT0 = isolate(DIT0())
                       )
         
         tout <- (seq(0,
                   input$Tf,
-                  by = 0.01))
+                  by = 1))
         out <- as.data.frame(SolveFF(out_pars, tout))
         out$weight <- out$f + FFM0()
         
         myData(out)
-        myPlot(ggplot(out, aes(x=time, y=weight)) + 
+        myPlot(ggplotly(ggplot(out, aes(x=time, y=2.2*weight)) + 
                    geom_point() +
                    #ylim(70,80) +
                    xlab("Day of Weight Loss") + 
-                   ylab("kg"))
+                   ylab("kg")))
     })
     
     uitable <- reactiveVal() #To set the uitable
@@ -152,7 +156,7 @@ shinyServer(function(input, output) {
             write_csv(uitable(), file)
         }
     )
-    output$guessPlot <- renderPlot({
+    output$guessPlot <- renderPlotly({
         myPlot()
         
     })

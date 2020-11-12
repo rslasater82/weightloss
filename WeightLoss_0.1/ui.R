@@ -1,5 +1,5 @@
 library(shiny)
-library(shinycssloaders)
+#library(shinycssloaders)
 
 # Define UI
 shinyUI(navbarPage("Weight Loss DE Plotter",
@@ -37,7 +37,7 @@ shinyUI(navbarPage("Weight Loss DE Plotter",
                          ),
             actionButton("execute", "Calculate")
         ),
-        mainPanel(plotOutput("guessPlot")%>% withSpinner(color="#0dc5c1"),
+        mainPanel(plotlyOutput("guessPlot"),#%>% withSpinner(color="#0dc5c1"),
                   tableOutput("fullTable") 
                   )
     ),
