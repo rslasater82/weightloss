@@ -106,10 +106,10 @@ shinyServer(function(input, output) {
         
         tout <- (seq(0,
                   input$Tf,
-                  by = .01))
+                  by = 1))
         out <- as.data.frame(SolveFF(out_pars, tout))
-        out_df$FFM <- 10.4*log(out_df$f/C())
-        out$weight <- out$f + FFM0()
+        out$FFM <- 10.4*log(out$f/C())
+        out$weight <- out$f + out$FFM
         
         myData(out)
         myPlot(ggplotly(ggplot(out, aes(x=time, y=weight)) + 
@@ -182,5 +182,8 @@ shinyServer(function(input, output) {
                                     "NI1 =", NI1(),
                                     "DIT1 =", DIT1()
     ))
+    output$attribution <- renderText(
+        "App developed by Robert S. Lasater, rslasater@gmail.com, and James K. Starling, jkstarling09@gmail.com"
+    )
     
 })

@@ -35,24 +35,26 @@ shinyUI(navbarPage("Weight Loss DE Plotter",
                          value = 900),
             actionButton("execute", "Calculate")
         ),
-        mainPanel(plotlyOutput("guessPlot")#,#%>% withSpinner(color="#0dc5c1"),
+        mainPanel(plotlyOutput("guessPlot"),
+                  textOutput("attribution")
+                  #,#%>% withSpinner(color="#0dc5c1"),
                   #tableOutput("fullTable") 
                   )
-    ),
-    tabPanel("Table", fluid = TRUE,
-         sidebarPanel(
-             numericInput("week", "Week: ", 0),
-             numericInput("actual", "Actual Weight: ", 200),
-             actionButton("addrow", "Add Entry"),
-             actionButton("merge", "Add to Plot"),
-             downloadButton("download", lable = "Export Table"),
-             fileInput("load", "Load csv", accept = ".csv"),
-             actionButton("userfile", "Use File")
-         ),
-         mainPanel(tableOutput("guessTable"))
-        ),
-    tabPanel("TestValues", fluid = TRUE,
-             mainPanel(textOutput("test")))
+    )#,
+    #tabPanel("Table", fluid = TRUE,
+    #     sidebarPanel(
+    #         numericInput("week", "Week: ", 0),
+    #         numericInput("actual", "Actual Weight: ", 200),
+    #         actionButton("addrow", "Add Entry"),
+    #         actionButton("merge", "Add to Plot"),
+    #         downloadButton("download", lable = "Export Table"),
+    #         fileInput("load", "Load csv", accept = ".csv"),
+    #         actionButton("userfile", "Use File")
+    #     ),
+    #     mainPanel(tableOutput("guessTable"))
+    #    ),
+    #tabPanel("TestValues", fluid = TRUE,
+    #         mainPanel(textOutput("test")))
     )
 )
 
