@@ -21,7 +21,7 @@ shinyServer(function(input, output) {
     RMR0 <- reactive(a1()*(input$weight^(p()))-y1()*input$age)
     
     a <- 0.02       # adaption param: a-"percent that RMR has lowered than expected"
-    Cr <- reactive(input$CalRed*TEE0())   #Calories required with user input for deficit, other model was reduced by 25%
+    Cr <- reactive(input$CalRed)   #Calories required with user input for deficit, other model was reduced by 25%
     
     NEAT0 <- reactive(0.326*TEE0())
     #omega <- 0.075      # percent of total caloric input contribution to DIT
@@ -106,14 +106,14 @@ shinyServer(function(input, output) {
         
         tout <- (seq(0,
                   input$Tf,
-                  by = 1))
+                  by = .01))
         out <- as.data.frame(SolveFF(out_pars, tout))
+        out_df$FFM <- 10.4*log(out_df$f/C())
         out$weight <- out$f + FFM0()
         
         myData(out)
-        myPlot(ggplotly(ggplot(out, aes(x=time, y=2.2*weight)) + 
+        myPlot(ggplotly(ggplot(out, aes(x=time, y=weight)) + 
                    geom_point() +
-                   #ylim(70,80) +
                    xlab("Day of Weight Loss") + 
                    ylab("kg")))
     })
@@ -157,7 +157,7 @@ shinyServer(function(input, output) {
         }
     )
     output$guessPlot <- renderPlotly({
-        myPlot()
+        print(myPlot())
         
     })
     output$guessTable = renderTable({

@@ -1,4 +1,5 @@
 library(shiny)
+library(plotly)
 #library(shinycssloaders)
 
 # Define UI
@@ -29,16 +30,13 @@ shinyUI(navbarPage("Weight Loss DE Plotter",
             numericInput("Tf", 
                          label = "Number of days to diet: ",
                          value = 336),
-            sliderInput("CalRed",
-                         label = "Percent Calories to reduce from Total Energy Expenditure: ",
-                         value = .25,
-                         min = 0,
-                         max = 1
-                         ),
+            numericInput("CalRed",
+                         label = "Calories to reduce from Total Energy Expenditure: ",
+                         value = 900),
             actionButton("execute", "Calculate")
         ),
-        mainPanel(plotlyOutput("guessPlot"),#%>% withSpinner(color="#0dc5c1"),
-                  tableOutput("fullTable") 
+        mainPanel(plotlyOutput("guessPlot")#,#%>% withSpinner(color="#0dc5c1"),
+                  #tableOutput("fullTable") 
                   )
     ),
     tabPanel("Table", fluid = TRUE,
