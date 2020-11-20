@@ -11,17 +11,19 @@ shinyServer(function(input, output) {
     myPlot = reactiveVal()
     myData = reactiveVal()
     
+    w0 = reactive(if_else(input$unit == "Metric", as.numeric(input$weight), as.numeric(input$weight/2.2)))
+    height = reactive(if_else(input$unit == "Metric", as.numeric(input$height), as.numeric(input$height*2.54)))
     a1 <- reactive(if_else(input$sex == "M",293,248))
     y1 <- reactive(if_else(input$sex == "M",5.92,5.09))
     p <- reactive(if_else(input$sex == "M",.4330,.4356))
     TEE0 <- reactive(if_else(input$sex == "M",
-                             -.0971*(as.numeric(input$weight)^2)+40.853*(as.numeric(input$weight))+323.59,
-                             .0278*(as.numeric(input$weight)^2) + 9.2893*(as.numeric(input$weight))+1528.9))
+                             -.0971*(as.numeric(w0())^2)+40.853*(as.numeric(w0()))+323.59,
+                             .0278*(as.numeric(w0())^2) + 9.2893*(as.numeric(w0()))+1528.9))
     
-    RMR0 <- reactive(a1()*(input$weight^(p()))-y1()*input$age)
+    RMR0 <- reactive(a1()*(w0()^(p()))-y1()*input$age)
     
     a <- 0.02       # adaption param: a-"percent that RMR has lowered than expected"
-    Cr <- reactive(input$CalRed)   #Calories required with user input for deficit, other model was reduced by 25%
+    Cr <- reactive(-input$CalRed)   #Calories required with user input for deficit, other model was reduced by 25%
     
     NEAT0 <- reactive(0.326*TEE0())
     #omega <- 0.075      # percent of total caloric input contribution to DIT
@@ -33,21 +35,21 @@ shinyServer(function(input, output) {
     
     
     polyc <- reactive(case_when(input$sex == "M" ~ 
-                                    c(-input$weight -71.73349 - 0.38273e-1*input$age + 0.6555023*input$height,    # 1's terms
-                                      1.0 + 3.5907722 - 0.2296e-2*input$age - 0.13308e-1*input$height, # x terms 
-                                      0.332e-4*input$age - 0.7195e-1 + 0.2721e-3*input$height,         # x^2 terms 
-                                      0.6841e-3 - 0.187e-5*input$height,                       # x^3 terms
+                                    c(-w0() -71.73349 - 0.38273e-1*input$age + 0.6555023*height(),    # 1's terms
+                                      1.0 + 3.5907722 - 0.2296e-2*input$age - 0.13308e-1*height(), # x terms 
+                                      0.332e-4*input$age - 0.7195e-1 + 0.2721e-3*height(),         # x^2 terms 
+                                      0.6841e-3 - 0.187e-5*height(),                       # x^3 terms
                                       - 0.162e-5 ), 
-                       TRUE ~ c(-input$weight - 72.055453 + 0.6555023*input$height - 0.38273e-1*input$age,   # 1's terms
-                                1.0 + 2.4837412 - 0.2296e-2*input$age - 0.13308e-1*input$height,   # x terms 
-                                -0.390627e-1 +0.332e-4*input$age +0.2721e-3*input$height,          # x^2 terms
-                                0.2291e-3 -0.187e-5*input$height,                          # x^3 terms
+                       TRUE ~ c(-w0() - 72.055453 + 0.6555023*height() - 0.38273e-1*input$age,   # 1's terms
+                                1.0 + 2.4837412 - 0.2296e-2*input$age - 0.13308e-1*height(),   # x terms 
+                                -0.390627e-1 +0.332e-4*input$age +0.2721e-3*height(),          # x^2 terms
+                                0.2291e-3 -0.187e-5*height(),                          # x^3 terms
                                 3.5*10^(-7) )))
         
     res <- reactive(polyroot(polyc()))
     F0 <-  reactive(Re(res()[1]))
 
-    FFM0 <- reactive(input$weight - F0())
+    FFM0 <- reactive(w0() - F0())
     
     C = reactive(F0() * 1/exp(FFM0()/10.4))
     
@@ -95,7 +97,7 @@ shinyServer(function(input, output) {
                       TEE0 = isolate(TEE0()),
                       p = isolate(p()),
                       PA0 = isolate(PA0()),
-                      W0 = isolate(input$weight),
+                      W0 = isolate(w0()),
                       DIT1 = isolate(DIT1()),
                       NI1 = isolate(NI1()),
                       A = isolate(input$age),
@@ -112,10 +114,19 @@ shinyServer(function(input, output) {
         out$weight <- out$f + out$FFM
         
         myData(out)
+        if(input$unit=="Metric"){
         myPlot(ggplotly(ggplot(out, aes(x=time, y=weight)) + 
                    geom_point() +
                    xlab("Day of Weight Loss") + 
                    ylab("kg")))
+        }
+        else{
+            out$weight = out$weight*2.2
+            myPlot(ggplotly(ggplot(out, aes(x=time, y=weight)) + 
+                                geom_point() +
+                                xlab("Day of Weight Loss") + 
+                                ylab("lb")))
+        }
     })
     
     uitable <- reactiveVal() #To set the uitable
@@ -135,7 +146,7 @@ shinyServer(function(input, output) {
         table1 = uitable()
         table2 = data.frame("time" = input$week, 
                             "Actual Wt" = input$actual, 
-                            "Pct Lost" =  (input$weight-input$actual)/input$weight)
+                            "Pct Lost" =  (w0()-input$actual)/w0())
         inputtable = rbind(table1,table2)
         uitable(inputtable)
     })
@@ -180,7 +191,8 @@ shinyServer(function(input, output) {
                                     "C =", C(),
                                     "CC =", CC(),
                                     "NI1 =", NI1(),
-                                    "DIT1 =", DIT1()
+                                    "DIT1 =", DIT1(),
+                                    "Weight = ", w0()
     ))
     output$attribution <- renderText(
         "App developed by Robert S. Lasater, rslasater@gmail.com, and James K. Starling, jkstarling09@gmail.com"
